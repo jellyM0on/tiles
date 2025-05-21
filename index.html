@@ -16,10 +16,8 @@
         <button onclick="handleClickGenerateBoard()">↪️ Generate Board</button>
         <table id="board"></table>
       </div>
-      <div id="options">
-        <button onclick="handleClickAlgo(true)">Simple</button>
-        <button onclick="handleClickAlgo(false)">Manhattan Distance</button>
-      </div>
+      <div id="options"></div>
+      <div id="results"></div>
     </main>
   </body>
   <script>
@@ -41,6 +39,7 @@
 
     // UI
     plotBoard(board);
+    updateUIControls();
 
     function plotBoard(board, highlightCoord = null) {
       const table = document.getElementById("board");
@@ -112,13 +111,100 @@
       plotBoard(board);
     }
 
+    function updateUIControls() {
+      const generateBtn = document.querySelector(
+        "button[onclick='handleClickGenerateBoard()']"
+      );
+      const optionsDiv = document.getElementById("options");
+
+      optionsDiv.innerHTML = "";
+
+      if (isEditMode) {
+        generateBtn.style.display = "inline-block";
+
+        const simpleBtn = document.createElement("button");
+        simpleBtn.textContent = "Simple";
+        simpleBtn.onclick = () => handleClickAlgo(true);
+
+        const manhattanBtn = document.createElement("button");
+        manhattanBtn.textContent = "Manhattan Distance";
+        manhattanBtn.onclick = () => handleClickAlgo(false);
+
+        optionsDiv.appendChild(simpleBtn);
+        optionsDiv.appendChild(manhattanBtn);
+      } else {
+        generateBtn.style.display = "none";
+
+        const againBtn = document.createElement("button");
+        againBtn.textContent = "🔁 Again";
+        againBtn.onclick = () => {
+          isEditMode = true;
+          plotBoard(board);
+          updateUIControls();
+          updateResults();
+        };
+
+        optionsDiv.appendChild(againBtn);
+      }
+    }
+
+    function updateResults(boards, isSimple) {
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "";
+
+      if (isEditMode) {
+        resultsDiv.innerHTML = "";
+        return;
+      }
+
+      const title = document.createElement("h3");
+      title.textContent = "Results";
+      resultsDiv.appendChild(title);
+
+      const rowContainer = document.createElement("div");
+      rowContainer.style.display = "flex";
+      rowContainer.style.gap = "20px";
+      rowContainer.style.alignItems = "flex-start";
+
+      const miniBoard = document.createElement("table");
+      miniBoard.classList.add("mini-board");
+
+      board.forEach((row) => {
+        const tr = document.createElement("tr");
+        row.forEach((cell) => {
+          const td = document.createElement("td");
+          td.textContent = cell === 0 ? "" : cell;
+          td.style.padding = "4px 8px";
+          td.style.fontSize = "14px";
+          tr.appendChild(td);
+        });
+        miniBoard.appendChild(tr);
+      });
+
+      const infoBox = document.createElement("div");
+
+      const mode = document.createElement("p");
+      mode.textContent = `Mode: ${isSimple ? "Simple" : "Manhattan Distance"}`;
+
+      const steps = document.createElement("p");
+      steps.textContent = `Iterations: ${boards.length}`;
+
+      infoBox.appendChild(mode);
+      infoBox.appendChild(steps);
+
+      rowContainer.appendChild(miniBoard);
+      rowContainer.appendChild(infoBox);
+      resultsDiv.appendChild(rowContainer);
+    }
+
     function handleClickAlgo(isSimple) {
       isEditMode = false;
+      updateUIControls();
 
       const boards = runSimpleAlgo(board, goalBoard, isSimple);
       let index = 0;
 
-      console.log(boards);
+      updateResults(boards, isSimple);
 
       const interval = setInterval(() => {
         if (index >= boards.length) {
