@@ -4,6 +4,14 @@ function runSimpleAlgo(board, goalBoard, isSimple) {
   let currentBoard = board;
   let boards = [{ board: board, zeroCoord: currentZeroCoord }];
 
+  const initialScore = isSimple
+    ? countMisplacedTiles(currentBoard, goalBoard)
+    : computeManhattanDistance(currentBoard, goalBoard);
+
+  if (initialScore === 0) {
+    return boards;
+  }
+
   while (true) {
     let zeroNeighbors = getZeroNeighbors(currentZeroCoord, previousZeroCoord);
 
@@ -154,7 +162,12 @@ function isSolvable(arr) {
 }
 
 function generateSolvableBoard() {
-  const maxInversions = 0;
+  const goalBoard = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 0],
+  ];
+  const maxManhattanDistance = 5;
 
   while (true) {
     const values = [0, 1, 2, 3, 4, 5, 6, 7, 8];
@@ -162,9 +175,15 @@ function generateSolvableBoard() {
       const j = Math.floor(Math.random() * (i + 1));
       [values[i], values[j]] = [values[j], values[i]];
     }
-    const { solvable, inversions } = isSolvable(values);
-    if (solvable && inversions <= maxInversions) {
-      return [values.slice(0, 3), values.slice(3, 6), values.slice(6, 9)];
+
+    const { solvable } = isSolvable(values);
+    if (!solvable) continue;
+
+    const board = [values.slice(0, 3), values.slice(3, 6), values.slice(6, 9)];
+
+    const distance = computeManhattanDistance(board, goalBoard);
+    if (distance <= maxManhattanDistance) {
+      return board;
     }
   }
 }
