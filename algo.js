@@ -1,4 +1,4 @@
-function runSimpleAlgo(board, goalBoard, isSimple) {
+function runAlgo(board, goalBoard, isSimple) {
   let currentZeroCoord = findZero(board);
   let previousZeroCoord = null;
   let currentBoard = board;
