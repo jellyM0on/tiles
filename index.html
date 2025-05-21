@@ -13,10 +13,12 @@
     </header>
     <main>
       <div>
+        <button onclick="handleClickGenerateBoard()">↪️ Generate Board</button>
         <table id="board"></table>
       </div>
       <div id="options">
-        <button onclick="handleClickSimpleAlgo()">Simple</button>
+        <button onclick="handleClickAlgo(true)">Simple</button>
+        <button onclick="handleClickAlgo(false)">Manhattan Distance</button>
       </div>
     </main>
   </body>
@@ -110,11 +112,13 @@
       plotBoard(board);
     }
 
-    function handleClickSimpleAlgo() {
+    function handleClickAlgo(isSimple) {
       isEditMode = false;
 
-      const boards = runSimpleAlgo(board, goalBoard);
+      const boards = runSimpleAlgo(board, goalBoard, isSimple);
       let index = 0;
+
+      console.log(boards);
 
       const interval = setInterval(() => {
         if (index >= boards.length) {
@@ -125,9 +129,13 @@
         const step = boards[index];
         plotBoard(step.board, step.zeroCoord);
         index++;
-      }, 100);
+      }, 50);
     }
 
-    function handleClickkAnnealingAlgo() {}
+    function handleClickGenerateBoard() {
+      const newBoard = generateSolvableBoard();
+      board = newBoard;
+      plotBoard(newBoard);
+    }
   </script>
 </html>

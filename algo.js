@@ -1,4 +1,4 @@
-function runSimpleAlgo(board, goalBoard) {
+function runSimpleAlgo(board, goalBoard, isSimple) {
   let currentZeroCoord = findZero(board);
   let previousZeroCoord = null;
   let currentBoard = board;
@@ -11,14 +11,15 @@ function runSimpleAlgo(board, goalBoard) {
       goalBoard,
       currentBoard,
       currentZeroCoord,
-      zeroNeighbors
+      zeroNeighbors,
+      isSimple
     );
 
     if (nextBoard) {
       boards.push({ board: nextBoard.board, zeroCoord: nextBoard.zero });
     }
 
-    if (!nextBoard || nextBoard.misplaced === 0) {
+    if (!nextBoard || nextBoard.score === 0) {
       break;
     }
 
@@ -58,36 +59,27 @@ function getZeroNeighbors([x, y], previousZeroCoord) {
   });
 }
 
-function generateNextBoard(goalBoard, board, currentZeroCoord, zeroNeighbors) {
-  const [x0, y0] = currentZeroCoord;
+function computeManhattanDistance(currentBoard, goalBoard) {
+  let totalDistance = 0;
 
-  let bestBoards = [];
-  let bestScore = Infinity;
-  let candidateCoords = [];
-
-  for (const [nx, ny] of zeroNeighbors) {
-    const newBoard = board.map((row) => row.slice());
-
-    [newBoard[x0][y0], newBoard[nx][ny]] = [newBoard[nx][ny], newBoard[x0][y0]];
-
-    const misplacedCount = countMisplacedTiles(newBoard, goalBoard);
-
-    if (misplacedCount < bestScore) {
-      bestBoards = [newBoard];
-      candidateCoords = [[nx, ny]];
-      bestScore = misplacedCount;
-    } else if (misplacedCount === bestScore) {
-      bestBoards.push(newBoard);
-      candidateCoords.push([nx, ny]);
+  const goalPositions = {};
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 3; j++) {
+      goalPositions[goalBoard[i][j]] = [i, j];
     }
   }
 
-  const index = Math.floor(Math.random() * bestBoards.length);
-  return {
-    board: bestBoards[index],
-    misplaced: bestScore,
-    zero: candidateCoords[index],
-  };
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 3; j++) {
+      const val = currentBoard[i][j];
+      if (val !== 0) {
+        const [gi, gj] = goalPositions[val];
+        totalDistance += Math.abs(i - gi) + Math.abs(j - gj);
+      }
+    }
+  }
+
+  return totalDistance;
 }
 
 function countMisplacedTiles(currentBoard, goalBoard) {
@@ -97,7 +89,6 @@ function countMisplacedTiles(currentBoard, goalBoard) {
     for (let j = 0; j < 3; j++) {
       const currentVal = currentBoard[i][j];
       const goalVal = goalBoard[i][j];
-
       if (currentVal !== 0 && currentVal !== goalVal) {
         count++;
       }
@@ -105,4 +96,75 @@ function countMisplacedTiles(currentBoard, goalBoard) {
   }
 
   return count;
+}
+
+function generateNextBoard(
+  goalBoard,
+  board,
+  currentZeroCoord,
+  zeroNeighbors,
+  isSimple
+) {
+  const [x0, y0] = currentZeroCoord;
+
+  let bestBoards = [];
+  let bestScore = Infinity;
+  let candidateCoords = [];
+
+  for (const [nx, ny] of zeroNeighbors) {
+    const newBoard = board.map((row) => row.slice());
+    [newBoard[x0][y0], newBoard[nx][ny]] = [newBoard[nx][ny], newBoard[x0][y0]];
+
+    const score = isSimple
+      ? countMisplacedTiles(newBoard, goalBoard)
+      : computeManhattanDistance(newBoard, goalBoard);
+
+    if (score < bestScore) {
+      bestBoards = [newBoard];
+      candidateCoords = [[nx, ny]];
+      bestScore = score;
+    } else if (score === bestScore) {
+      bestBoards.push(newBoard);
+      candidateCoords.push([nx, ny]);
+    }
+  }
+
+  if (bestBoards.length === 0) return null;
+
+  const index = Math.floor(Math.random() * bestBoards.length);
+  return {
+    board: bestBoards[index],
+    score: bestScore,
+    zero: candidateCoords[index],
+  };
+}
+
+function isSolvable(arr) {
+  const flat = arr.filter((n) => n !== 0);
+  let inversions = 0;
+  for (let i = 0; i < flat.length; i++) {
+    for (let j = i + 1; j < flat.length; j++) {
+      if (flat[i] > flat[j]) inversions++;
+    }
+  }
+  return {
+    solvable: inversions % 2 === 0,
+    inversions: inversions,
+  };
+}
+
+function generateSolvableBoard() {
+  const maxInversions = 0;
+
+  while (true) {
+    const values = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+    for (let i = values.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [values[i], values[j]] = [values[j], values[i]];
+    }
+    const { solvable, inversions } = isSolvable(values);
+    if (solvable && inversions <= maxInversions) {
+      return [values.slice(0, 3), values.slice(3, 6), values.slice(6, 9)];
+    }
+  }
 }
