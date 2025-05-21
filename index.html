@@ -28,6 +28,7 @@
   </body>
   <script>
     let isEditMode = true;
+    let animationInterval = null;
 
     // Initial board
     let board = [
@@ -144,6 +145,11 @@
         const againBtn = document.createElement("button");
         againBtn.textContent = "🔁 Again";
         againBtn.onclick = () => {
+          if (animationInterval) {
+            clearInterval(animationInterval);
+            animationInterval = null;
+          }
+
           isEditMode = true;
           plotBoard(board);
           updateUIControls();
@@ -233,9 +239,10 @@
 
       updateResults(boards, isSimple);
 
-      const interval = setInterval(() => {
+      animationInterval = setInterval(() => {
         if (index >= boards.length) {
-          clearInterval(interval);
+          clearInterval(animationInterval);
+          animationInterval = null;
           return;
         }
 
