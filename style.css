@@ -11,6 +11,9 @@ header {
 
 main {
   padding: 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* board */
@@ -28,7 +31,7 @@ main {
 }
 
 #board td:hover {
-    background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 #board tr:first-child td {
@@ -44,4 +47,12 @@ main {
   border-right: 2px solid black;
 }
 
+/* opts */
+#options {
+  width: fit-content;
+}
 
+.highlight {
+  background-color: black;
+  transition: background-color 0.1s;
+}

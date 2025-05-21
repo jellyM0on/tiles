@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>9 Tiles</title>
     <link rel="stylesheet" href="style.css" />
+    <script src="./algo.js"></script>
   </head>
   <body>
     <header>
@@ -14,10 +15,14 @@
       <div>
         <table id="board"></table>
       </div>
-      <div></div>
+      <div id="options">
+        <button onclick="handleClickSimpleAlgo()">Simple</button>
+      </div>
     </main>
   </body>
   <script>
+    let isEditMode = true;
+
     // Initial board
     let board = [
       [1, 0, 2],
@@ -32,10 +37,10 @@
       [7, 8, 0],
     ];
 
-    // UI 
+    // UI
     plotBoard(board);
 
-    function plotBoard(board) {
+    function plotBoard(board, highlightCoord = null) {
       const table = document.getElementById("board");
       table.innerHTML = "";
 
@@ -44,16 +49,26 @@
 
         row.forEach((cell, colIndex) => {
           const td = document.createElement("td");
-          td.setAttribute("draggable", true);
+          td.setAttribute("draggable", isEditMode);
           td.dataset.row = rowIndex;
           td.dataset.col = colIndex;
 
           td.textContent = cell === 0 ? "" : cell;
 
-          td.addEventListener("dragstart", handleDragStart);
-          td.addEventListener("dragover", handleDragOver);
-          td.addEventListener("dragleave", handleDragLeave);
-          td.addEventListener("drop", handleDrop);
+          if (
+            highlightCoord &&
+            rowIndex === highlightCoord[0] &&
+            colIndex === highlightCoord[1]
+          ) {
+            td.classList.add("highlight");
+          }
+
+          if (isEditMode) {
+            td.addEventListener("dragstart", handleDragStart);
+            td.addEventListener("dragover", handleDragOver);
+            td.addEventListener("dragleave", handleDragLeave);
+            td.addEventListener("drop", handleDrop);
+          }
 
           tr.appendChild(td);
         });
@@ -94,5 +109,25 @@
 
       plotBoard(board);
     }
+
+    function handleClickSimpleAlgo() {
+      isEditMode = false;
+
+      const boards = runSimpleAlgo(board, goalBoard);
+      let index = 0;
+
+      const interval = setInterval(() => {
+        if (index >= boards.length) {
+          clearInterval(interval);
+          return;
+        }
+
+        const step = boards[index];
+        plotBoard(step.board, step.zeroCoord);
+        index++;
+      }, 100);
+    }
+
+    function handleClickkAnnealingAlgo() {}
   </script>
 </html>
