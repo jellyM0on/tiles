@@ -18,6 +18,12 @@
       </div>
       <div id="options"></div>
       <div id="results"></div>
+      <div id="modal" class="modal hidden">
+        <div class="modal-content">
+          <p>This board is not solvable.</p>
+          <button onclick="closeModal()">OK</button>
+        </div>
+      </div>
     </main>
   </body>
   <script>
@@ -157,6 +163,10 @@
         return;
       }
 
+      // Calculate inversions from current board
+      const flatBoard = board.flat();
+      const { inversions } = isSolvable(flatBoard);
+
       const title = document.createElement("h3");
       title.textContent = "Results";
       resultsDiv.appendChild(title);
@@ -192,12 +202,29 @@
       infoBox.appendChild(mode);
       infoBox.appendChild(steps);
 
+      if (inversions > 9) {
+        const warning = document.createElement("p");
+        warning.textContent =
+          "⚠️ High inversion count. This may take longer to solve.";
+        warning.style.color = "darkred";
+        warning.style.fontWeight = "bold";
+        infoBox.appendChild(warning);
+      }
+
       rowContainer.appendChild(miniBoard);
       rowContainer.appendChild(infoBox);
       resultsDiv.appendChild(rowContainer);
     }
 
     function handleClickAlgo(isSimple) {
+      const flatBoard = board.flat();
+      const { solvable } = isSolvable(flatBoard);
+
+      if (!solvable) {
+        document.getElementById("modal").classList.remove("hidden");
+        return;
+      }
+
       isEditMode = false;
       updateUIControls();
 
@@ -222,6 +249,10 @@
       const newBoard = generateSolvableBoard();
       board = newBoard;
       plotBoard(newBoard);
+    }
+
+    function closeModal() {
+      document.getElementById("modal").classList.add("hidden");
     }
   </script>
 </html>
