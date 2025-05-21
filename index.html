@@ -12,10 +12,15 @@
       <h1>9 TILES</h1>
     </header>
     <main>
-      <div>
-        <button onclick="handleClickGenerateBoard()">↪️ Generate Board</button>
-        <table id="board"></table>
+      <div id="main-content">
+        <div>
+          <button onclick="handleClickGenerateBoard()">
+            ↪️ Generate Board
+          </button>
+          <table id="board"></table>
+        </div>
       </div>
+
       <div id="options"></div>
       <div id="results"></div>
       <div id="modal" class="modal hidden">
@@ -24,6 +29,12 @@
           <button onclick="closeModal()">OK</button>
         </div>
       </div>
+      <i
+        >This algorithm is not an optimal solver for the 8-tile problem.
+        <br />
+        Instead, it is a simulation of a local search strategy that uses a
+        chosen heuristic.
+      </i>
     </main>
   </body>
   <script>
@@ -150,6 +161,9 @@
             animationInterval = null;
           }
 
+          const oldHistory = document.getElementById("history-container");
+          if (oldHistory) oldHistory.remove();
+
           isEditMode = true;
           plotBoard(board);
           updateUIControls();
@@ -169,7 +183,6 @@
         return;
       }
 
-      // Calculate inversions from current board
       const flatBoard = board.flat();
       const { inversions } = isSolvable(flatBoard);
 
@@ -238,6 +251,7 @@
       let index = 0;
 
       updateResults(boards, isSimple);
+      renderMiniHistory(boards);
 
       animationInterval = setInterval(() => {
         if (index >= boards.length) {
@@ -260,6 +274,45 @@
 
     function closeModal() {
       document.getElementById("modal").classList.add("hidden");
+    }
+
+    function renderMiniHistory(boards) {
+      const oldContainer = document.getElementById("history-container");
+      if (oldContainer) oldContainer.remove();
+
+      if (isEditMode) return;
+
+      const historyContainer = document.createElement("div");
+      historyContainer.id = "history-container";
+
+      const historyDiv = document.createElement("div");
+      historyDiv.id = "history";
+
+      historyContainer.appendChild(historyDiv);
+
+      const mainContent = document.getElementById("main-content");
+      mainContent.appendChild(historyContainer);
+
+      boards.forEach((step) => {
+        const wrapper = document.createElement("div");
+        wrapper.classList.add("mini-step");
+
+        const table = document.createElement("table");
+
+        for (let i = 0; i < 3; i++) {
+          const tr = document.createElement("tr");
+          for (let j = 0; j < 3; j++) {
+            const td = document.createElement("td");
+            const isZero = step.zeroCoord[0] === i && step.zeroCoord[1] === j;
+            if (isZero) td.classList.add("highlight");
+            tr.appendChild(td);
+          }
+          table.appendChild(tr);
+        }
+
+        wrapper.appendChild(table);
+        historyDiv.appendChild(wrapper);
+      });
     }
   </script>
 </html>
