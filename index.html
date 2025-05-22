@@ -266,7 +266,7 @@
     }
 
     function handleClickGenerateBoard() {
-      const newBoard = generateSolvableBoard();
+      const newBoard = generateSolvableBoard(goalBoard);
       board = newBoard;
       plotBoard(newBoard);
     }

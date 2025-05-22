@@ -121,9 +121,9 @@ function generateNextBoard(
 ) {
   const [x0, y0] = currentZeroCoord;
 
-  let bestBoards = [];
+  let visitedCandidates = [];
+  let unvisitedCandidates = [];
   let bestScore = Infinity;
-  let candidateCoords = [];
 
   for (const [nx, ny] of zeroNeighbors) {
     const newBoard = board.map((row) => row.slice());
@@ -133,51 +133,56 @@ function generateNextBoard(
       ? countMisplacedTiles(newBoard, goalBoard)
       : computeManhattanDistance(newBoard, goalBoard);
 
+    const boardStr = boardToString(newBoard);
+    const isVisited = visitedSet.has(boardStr);
+    const zeroCoord = [nx, ny];
+    const zeroDist = zeroDistanceToGoal(zeroCoord, goalBoard);
+
+    const candidate = {
+      board: newBoard,
+      score,
+      zero: zeroCoord,
+      zeroDist,
+      visited: isVisited,
+    };
+
     if (score < bestScore) {
-      bestBoards = [newBoard];
-      candidateCoords = [[nx, ny]];
       bestScore = score;
-    } else if (score === bestScore) {
-      bestBoards.push(newBoard);
-      candidateCoords.push([nx, ny]);
     }
-  }
 
-  if (bestBoards.length > 1) {
-    const unvisited = bestBoards
-      .map((b, i) => ({ board: b, coord: candidateCoords[i] }))
-      .filter(({ board }) => !visitedSet.has(boardToString(board)));
-
-    // Tie breaking prioritizes boards which have not yet been visited
-    if (unvisited.length > 0) {
-      const distances = unvisited.map(({ coord }) =>
-        zeroDistanceToGoal(coord, goalBoard)
-      );
-      const minDistance = Math.min(...distances);
-      const bestIndex = distances.findIndex((d) => d === minDistance);
-      const chosen = unvisited[bestIndex];
-
-      return {
-        board: chosen.board,
-        score: bestScore,
-        zero: chosen.coord,
-      };
+    if (isVisited) {
+      visitedCandidates.push(candidate);
     } else {
-      // Break ties with randomization if all generated boards have been visited
-      const index = Math.floor(Math.random() * bestBoards.length);
-      return {
-        board: bestBoards[index],
-        score: bestScore,
-        zero: candidateCoords[index],
-      };
+      unvisitedCandidates.push(candidate);
     }
   }
+
+  const candidatesToUse =
+    unvisitedCandidates.length > 0 ? unvisitedCandidates : visitedCandidates;
+
+  const chosen = selectBestCandidate(candidatesToUse, bestScore);
 
   return {
-    board: bestBoards[0],
-    score: bestScore,
-    zero: candidateCoords[0],
+    board: chosen.board,
+    score: chosen.score,
+    zero: chosen.zero,
   };
+}
+
+function selectBestCandidate(candidates, bestScore) {
+  const minDiff = Math.min(
+    ...candidates.map((c) => Math.abs(c.score - bestScore))
+  );
+  const closestScoreCandidates = candidates.filter(
+    (c) => Math.abs(c.score - bestScore) === minDiff
+  );
+  const minZeroDist = Math.min(
+    ...closestScoreCandidates.map((c) => c.zeroDist)
+  );
+  const equallyBest = closestScoreCandidates.filter(
+    (c) => c.zeroDist === minZeroDist
+  );
+  return equallyBest[Math.floor(Math.random() * equallyBest.length)];
 }
 
 function zeroDistanceToGoal(zeroCoord, goalBoard) {
@@ -202,8 +207,8 @@ function isSolvable(arr) {
   };
 }
 
-function generateSolvableBoard() {
-  const maxManhattanDistance = 3;
+function generateSolvableBoard(goalBoard) {
+  const maxManhattanDistance = 4;
 
   while (true) {
     const values = [0, 1, 2, 3, 4, 5, 6, 7, 8];
