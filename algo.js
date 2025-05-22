@@ -4,6 +4,9 @@ function runAlgo(board, goalBoard, isSimple) {
   let currentBoard = board;
   let boards = [{ board: board, zeroCoord: currentZeroCoord }];
 
+  let visited = new Set();
+  visited.add(boardToString(board));
+
   const initialScore = isSimple
     ? countMisplacedTiles(currentBoard, goalBoard)
     : computeManhattanDistance(currentBoard, goalBoard);
@@ -20,11 +23,13 @@ function runAlgo(board, goalBoard, isSimple) {
       currentBoard,
       currentZeroCoord,
       zeroNeighbors,
-      isSimple
+      isSimple,
+      visited
     );
 
     if (nextBoard) {
       boards.push({ board: nextBoard.board, zeroCoord: nextBoard.zero });
+      visited.add(boardToString(nextBoard.board));
     }
 
     if (!nextBoard || nextBoard.score === 0) {
@@ -111,7 +116,8 @@ function generateNextBoard(
   board,
   currentZeroCoord,
   zeroNeighbors,
-  isSimple
+  isSimple,
+  visitedSet
 ) {
   const [x0, y0] = currentZeroCoord;
 
@@ -138,18 +144,35 @@ function generateNextBoard(
   }
 
   if (bestBoards.length > 1) {
-    const distances = candidateCoords.map((coord) =>
-      zeroDistanceToGoal(coord, goalBoard)
-    );
-    const minDistance = Math.min(...distances);
-    const bestIndex = distances.findIndex((d) => d === minDistance);
+    const unvisited = bestBoards
+      .map((b, i) => ({ board: b, coord: candidateCoords[i] }))
+      .filter(({ board }) => !visitedSet.has(boardToString(board)));
 
-    return {
-      board: bestBoards[bestIndex],
-      score: bestScore,
-      zero: candidateCoords[bestIndex],
-    };
+    // Tie breaking prioritizes boards which have not yet been visited
+    if (unvisited.length > 0) {
+      const distances = unvisited.map(({ coord }) =>
+        zeroDistanceToGoal(coord, goalBoard)
+      );
+      const minDistance = Math.min(...distances);
+      const bestIndex = distances.findIndex((d) => d === minDistance);
+      const chosen = unvisited[bestIndex];
+
+      return {
+        board: chosen.board,
+        score: bestScore,
+        zero: chosen.coord,
+      };
+    } else {
+      // Break ties with randomization if all generated boards have been visited
+      const index = Math.floor(Math.random() * bestBoards.length);
+      return {
+        board: bestBoards[index],
+        score: bestScore,
+        zero: candidateCoords[index],
+      };
+    }
   }
+
   return {
     board: bestBoards[0],
     score: bestScore,
@@ -199,4 +222,8 @@ function generateSolvableBoard() {
       return board;
     }
   }
+}
+
+function boardToString(board) {
+  return board.flat().join(",");
 }
