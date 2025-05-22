@@ -223,8 +223,7 @@
 
       if (inversions > 9) {
         const warning = document.createElement("p");
-        warning.textContent =
-          "⚠️ High inversion count.";
+        warning.textContent = "⚠️ High inversion count.";
         warning.style.color = "darkred";
         warning.style.fontWeight = "bold";
         infoBox.appendChild(warning);
@@ -303,6 +302,8 @@
           const tr = document.createElement("tr");
           for (let j = 0; j < 3; j++) {
             const td = document.createElement("td");
+            const val = step.board[i][j];
+            td.textContent = val !== 0 ? val : "";
             const isZero = step.zeroCoord[0] === i && step.zeroCoord[1] === j;
             if (isZero) td.classList.add("highlight");
             tr.appendChild(td);
