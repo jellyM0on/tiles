@@ -137,14 +137,32 @@ function generateNextBoard(
     }
   }
 
-  if (bestBoards.length === 0) return null;
+  if (bestBoards.length > 1) {
+    const distances = candidateCoords.map((coord) =>
+      zeroDistanceToGoal(coord, goalBoard)
+    );
+    const minDistance = Math.min(...distances);
+    const bestIndex = distances.findIndex((d) => d === minDistance);
 
-  const index = Math.floor(Math.random() * bestBoards.length);
+    return {
+      board: bestBoards[bestIndex],
+      score: bestScore,
+      zero: candidateCoords[bestIndex],
+    };
+  }
   return {
-    board: bestBoards[index],
+    board: bestBoards[0],
     score: bestScore,
-    zero: candidateCoords[index],
+    zero: candidateCoords[0],
   };
+}
+
+function zeroDistanceToGoal(zeroCoord, goalBoard) {
+  const goalZeroCoord = findZero(goalBoard);
+  return (
+    Math.abs(zeroCoord[0] - goalZeroCoord[0]) +
+    Math.abs(zeroCoord[1] - goalZeroCoord[1])
+  );
 }
 
 function isSolvable(arr) {
