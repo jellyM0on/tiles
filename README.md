@@ -17,6 +17,11 @@ https://github.com/user-attachments/assets/67313e1c-663a-453a-b30c-331081c12d75
 
 ![Screenshot 2025-05-22 at 22 14 56](https://github.com/user-attachments/assets/2acb9374-a7c3-4739-9994-6dddc36e8ee3)
 
+- Below is an example of a board with multiple tie possibilities in terms of both heuristic cost and distance. Due to randomized tie-breaking, the algorithm may follow different paths across runs. This highlights a limitation of local search: no global backtracking or state-space exploration can lead to non-deterministic behavior, sensitivity to tie conditions, and the inability to guarantee best optimality.
+
+https://github.com/user-attachments/assets/2365bb23-74cb-4103-87fc-1f124f0d2118
+
+
 ### Stack 
 - JavaScript
 - HTML, CSS
