@@ -13,6 +13,9 @@
 
 https://github.com/user-attachments/assets/748a7a6b-ea29-40e9-92af-1b3a33e12177
 
+- Excel demonstration of the first example shown ([1, 0, 2], [4, 5, 3], [7, 8, 6])
+
+![Screenshot 2025-05-22 at 22 14 56](https://github.com/user-attachments/assets/2acb9374-a7c3-4739-9994-6dddc36e8ee3)
 
 ### Stack 
 - JavaScript
