@@ -11,7 +11,7 @@
 
 ### Demo
 
-https://github.com/user-attachments/assets/748a7a6b-ea29-40e9-92af-1b3a33e12177
+https://github.com/user-attachments/assets/67313e1c-663a-453a-b30c-331081c12d75
 
 - Excel demonstration of the first example shown ([1, 0, 2], [4, 5, 3], [7, 8, 6])
 
